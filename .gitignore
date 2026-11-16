@@ -25,6 +25,4 @@ buildNumber.properties
 .DS_Store
 Thumbs.db
 
-# Local subfolder mirror
-selenium-qa-project/
 

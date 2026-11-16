@@ -11,7 +11,7 @@ public class LoginPage extends BasePage {
     private final By submitButton = By.cssSelector("button[type='submit']");
     private final By createAccountTab = By.cssSelector(".auth-nav-tabs button:last-child");
     private final By signInTab = By.cssSelector(".auth-nav-tabs button:first-child");
-    private final By errorAlert = By.cssSelector("div[style*='status-danger'], .login-page-container div[style*='var(--status-danger']");
+    private final By errorAlert = By.cssSelector("div[style*='status-danger'], .login-page-container div[style*='var(--status-danger)']");
     private final By loginContainer = By.cssSelector(".login-page-container");
 
     public LoginPage(WebDriver driver) {
