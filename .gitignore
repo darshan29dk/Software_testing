@@ -24,3 +24,7 @@ buildNumber.properties
 *.log
 .DS_Store
 Thumbs.db
+
+# Local subfolder mirror
+selenium-qa-project/
+

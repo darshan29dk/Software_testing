@@ -33,6 +33,15 @@ public abstract class BasePage {
 
     protected boolean isVisible(By by) {
         try {
+            var elements = driver.findElements(by);
+            return !elements.isEmpty() && elements.get(0).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    protected boolean waitForVisibility(By by) {
+        try {
             return wait.until(ExpectedConditions.visibilityOfElementLocated(by)).isDisplayed();
         } catch (TimeoutException e) {
             return false;

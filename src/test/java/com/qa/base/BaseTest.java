@@ -21,6 +21,8 @@ public abstract class BaseTest {
             if (headless) o.addArguments("-headless");
             driver = new FirefoxDriver(o);
         } else {
+            System.setProperty("webdriver.chrome.silentOutput", "true");
+            java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(java.util.logging.Level.SEVERE);
             WebDriverManager.chromedriver().setup();
             ChromeOptions o = new ChromeOptions();
             if (headless) o.addArguments("--headless=new");

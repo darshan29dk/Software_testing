@@ -17,7 +17,7 @@ This repository contains an automated quality assurance test suite adapting a **
 | **Failed** | **0** | 0 Failures |
 | **Errors** | **0** | 0 Errors |
 | **Skipped** | **0** | 0 Skipped |
-| **Execution Duration** | **05:33 min** | Clean Run (`-Dheadless=true`) |
+| **Execution Duration** | **01:48 min** | Clean Run (`-Dheadless=true`) |
 | **Environment** | Java 17, Maven 3.9.9, Chrome 156 (Headless) | Windows 11 |
 
 ### Breakdown by Test Suite
