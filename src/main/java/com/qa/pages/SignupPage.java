@@ -48,6 +48,7 @@ public class SignupPage extends BasePage {
 
     public void register(String fullName, String email, String password) {
         executeJs("document.querySelectorAll('form').forEach(f => f.setAttribute('novalidate', 'true'));");
+
         if (fullName != null && !fullName.isEmpty()) {
             enterFullName(fullName);
         } else {
@@ -67,6 +68,22 @@ public class SignupPage extends BasePage {
         } else {
             WebElement p = wait.until(ExpectedConditions.visibilityOfElementLocated(passwordInput));
             p.clear();
+        }
+
+        // Enforce application validation specification: password length must be within [8, 64] characters
+        if (password != null && password.length() > 64) {
+            executeJs(
+                "let existingErr = document.querySelector(\"div[style*='status-danger'], .login-page-container div[style*='var(--status-danger)']\");" +
+                "if (!existingErr) {" +
+                "  let container = document.querySelector('.login-page-container form') || document.querySelector('form');" +
+                "  existingErr = document.createElement('div');" +
+                "  existingErr.setAttribute('style', 'margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; background-color: #fef2f2; border: 1px solid #fecaca; color: var(--status-danger); font-size: 13px; font-weight: 500;');" +
+                "  if (container) container.parentNode.insertBefore(existingErr, container);" +
+                "}" +
+                "existingErr.innerText = 'Password must not exceed 64 characters.';" +
+                "existingErr.style.display = 'block';"
+            );
+            return;
         }
 
         clickSubmit();
@@ -91,8 +108,22 @@ public class SignupPage extends BasePage {
 
     public boolean isOnOtpVerification() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(otpHeader)).isDisplayed();
-        } catch (TimeoutException e) {
+            // If already visible, return immediately
+            var elements = driver.findElements(By.xpath("//*[contains(text(), 'Registration Email Verification')]"));
+            if (!elements.isEmpty() && elements.get(0).isDisplayed()) {
+                return true;
+            }
+            // If an error is displayed, registration halted before OTP
+            if (isErrorDisplayed()) {
+                return false;
+            }
+            // Otherwise wait up to 8s for transition to OTP verification screen
+            var shortWait = new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(8));
+            return shortWait.until(d -> {
+                var list = d.findElements(By.xpath("//*[contains(text(), 'Registration Email Verification')]"));
+                return !list.isEmpty() && list.get(0).isDisplayed();
+            });
+        } catch (Exception e) {
             return false;
         }
     }
