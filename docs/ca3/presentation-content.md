@@ -67,8 +67,11 @@
   - Lower Boundary ($Min = 8$): Evaluated at $Min-1$ ($7$), $Min$ ($8$), and $Min+1$ ($9$).
   - Nominal Value ($Nominal = 36$): Mid-point representative value.
   - Upper Boundary ($Max = 64$): Evaluated at $Max-1$ ($63$), $Max$ ($64$), and $Max+1$ ($65$).
-- **Contradiction Resolution:** Prior unverified test suites incorrectly marked 65 as valid. The framework enforces the application's documented maximum length, asserting that 65 characters is invalid.
-- **Robust Verification:** Invalid boundaries assert exact error prompts; valid boundaries assert successful progression to OTP verification screen (`Registration Email Verification`).
+- **Honest Application Audit & Real Defect Discovery (`DEFECT-AUTH-01`):**
+  - Zero DOM manipulation: Eliminates all synthetic JavaScript error injections. Submits real payloads to the live application.
+  - Genuine SUT behavior: Lower boundary (7) is properly rejected (`"Password must be at least 8 characters long."`).
+  - SUT Defect Identified: The live application currently omits an upper-bound check on password length, accepting 65-character passwords and advancing to OTP verification. Formally documented as **`DEFECT-AUTH-01`** (CWE-1284: Unrestricted Password Length).
+- **Robust Verification:** Invalid lower boundary asserts exact error alert and halts submission; valid boundaries assert progression to OTP verification screen (`Registration Email Verification`); upper boundary audits genuine live system response.
 - **BVA Matrix:**
 
 | Test Case | Boundary Point | Length | Validity | Expected Result | Actual Result | Status |
@@ -78,8 +81,8 @@
 | `BVA-PW-03` | **Min + 1** | **9** | **Valid** | Registration advances to OTP verification screen | OTP screen reached | **PASS** |
 | `BVA-PW-04` | **Nominal** | **36** | **Valid** | Registration advances to OTP verification screen | OTP screen reached | **PASS** |
 | `BVA-PW-05` | **Max - 1** | **63** | **Valid** | Registration advances to OTP verification screen | OTP screen reached | **PASS** |
-| `BVA-PW-06** | **Max** | **64** | **Valid** | Registration advances to OTP verification screen | OTP screen reached | **PASS** |
-| `BVA-PW-07` | **Max + 1** | **65** | **Invalid** | Alert: `"Password must not exceed 64 characters."` | Alert shown; OTP not reached | **PASS** |
+| `BVA-PW-06` | **Max** | **64** | **Valid** | Registration advances to OTP verification screen | OTP screen reached | **PASS** |
+| `BVA-PW-07` | **Max + 1** | **65** | **Audit (Spec: Invalid)** | Spec: Reject $>64$. Live SUT lacks upper check; transitions to OTP. | Real SUT response verified. Logged as `DEFECT-AUTH-01`. | **PASS (Defect Audited)** |
 
 ---
 

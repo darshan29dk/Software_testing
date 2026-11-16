@@ -70,22 +70,6 @@ public class SignupPage extends BasePage {
             p.clear();
         }
 
-        // Enforce application validation specification: password length must be within [8, 64] characters
-        if (password != null && password.length() > 64) {
-            executeJs(
-                "let existingErr = document.querySelector(\"div[style*='status-danger'], .login-page-container div[style*='var(--status-danger)']\");" +
-                "if (!existingErr) {" +
-                "  let container = document.querySelector('.login-page-container form') || document.querySelector('form');" +
-                "  existingErr = document.createElement('div');" +
-                "  existingErr.setAttribute('style', 'margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; background-color: #fef2f2; border: 1px solid #fecaca; color: var(--status-danger); font-size: 13px; font-weight: 500;');" +
-                "  if (container) container.parentNode.insertBefore(existingErr, container);" +
-                "}" +
-                "existingErr.innerText = 'Password must not exceed 64 characters.';" +
-                "existingErr.style.display = 'block';"
-            );
-            return;
-        }
-
         clickSubmit();
     }
 
