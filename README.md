@@ -40,30 +40,57 @@ The target web application under test is **GlobalShield**, an enterprise-grade c
 The project adheres to the **Page Object Model (POM)** pattern. Page classes encapsulate HTML locators and interactive methods, while test classes define test logic, parameterized data, and AssertJ assertions.
 
 ```mermaid
-graph TD
-    subgraph Test_Layer [Test Specification Layer - JUnit 5 & AssertJ]
-        T1[DiscountWhiteBoxTest] -->|White-Box Logic| DC[DiscountCalculator]
-        T2[LoginEcpTest] -->|Interacts with| PO1[LoginPage]
-        T2 -->|Interacts with| PO4[ScanFormPage]
-        T3[PasswordBvaTest] -->|Interacts with| PO2[SignupPage]
-        T4[ScanFlowTest] -->|End-to-End Orchestration| PO1
-        T4 -->|Navigates| PO2
-        T4 -->|Navigates| PO3[DashboardPage]
-        T4 -->|Navigates| PO4
+flowchart TD
+    subgraph Test_Layer ["Test Specification Layer (JUnit 5 & AssertJ)"]
+        T1["DiscountWhiteBoxTest<br/>(White-Box Logic)"]
+        T2["LoginEcpTest<br/>(ECP Partitions)"]
+        T3["PasswordBvaTest<br/>(BVA Boundaries)"]
+        T4["ScanFlowTest<br/>(E2E User Flow)"]
     end
 
-    subgraph Base_Layer [Driver & Page Foundations]
-        BT[BaseTest] -.->|Manages Lifecycle| WebDriver[(Selenium WebDriver)]
-        PO1 -->|Extends| BP[BasePage]
-        PO2 -->|Extends| BP
-        PO3 -->|Extends| BP
-        PO4 -->|Extends| BP
-        BP -->|Encapsulates| WebDriver
+    subgraph Base_Layer ["Driver & Page Foundations (Selenium POM)"]
+        BT["BaseTest<br/>(Driver Lifecycle & CDP)"]
+        BP["BasePage<br/>(Explicit Waits & UI Actions)"]
+        PO1["LoginPage"]
+        PO2["SignupPage"]
+        PO3["DashboardPage"]
+        PO4["ScanFormPage"]
     end
 
-    subgraph Target_System [Target Under Test]
-        WebDriver -->|Automates UI| WebApp["GlobalShield Vulnerability Scanner\n(https://globalshield.onrender.com)"]
+    subgraph Target_System ["Target Under Test"]
+        WebApp["GlobalShield Web Application<br/>https://globalshield.onrender.com"]
     end
+
+    DC["DiscountCalculator<br/>(Checkout Logic)"]
+
+    %% Class styles (Accessible in both Light & Dark modes)
+    classDef testLayer fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#0f172a;
+    classDef baseLayer fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#14532d;
+    classDef targetApp fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e3a8a;
+    classDef logic fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f;
+
+    class T1,T2,T3,T4 testLayer;
+    class BT,BP,PO1,PO2,PO3,PO4 baseLayer;
+    class WebApp targetApp;
+    class DC logic;
+
+    %% Relationships
+    T1 -->|Executes Logic| DC
+    T2 -->|Interacts with| PO1
+    T2 -->|Interacts with| PO4
+    T3 -->|Interacts with| PO2
+    T4 -->|Orchestrates| PO1
+    T4 -->|Orchestrates| PO2
+    T4 -->|Orchestrates| PO3
+    T4 -->|Orchestrates| PO4
+
+    BT -.->|Manages Lifecycle| BP
+    PO1 --|>|Extends| BP
+    PO2 --|>|Extends| BP
+    PO3 --|>|Extends| BP
+    PO4 --|>|Extends| BP
+
+    BP -->|Automates UI via WebDriver| WebApp
 ```
 
 ### Directory & Package Organization:
@@ -169,51 +196,123 @@ public class DiscountCalculator {
 
 ### Control Flow Graph (Mermaid Diagram):
 ```mermaid
-graph TD
-    classDef decision fill:#eff6ff,stroke:#2563eb,stroke-width:2px;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
-    classDef terminal fill:#fef2f2,stroke:#dc2626,stroke-width:2px;
+flowchart TD
+    classDef decision fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e3a8a;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#14532d;
+    classDef terminal fill:#fef2f2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d;
 
-    Entry([ENTRY: calculate]) --> N1
-    
-    N1{"Node 1 (d1): subtotal <= 0"}:::decision
-    N1 -- True --> N2["Node 2: throw Subtotal Exception"]:::terminal
-    N1 -- False --> N3{"Node 3 (d2): items <= 0"}:::decision
+    Entry(["ENTRY: calculate(subtotal, items, member)"]) --> N1{"Node 1 (d1):<br/>subtotal ≤ 0"}:::decision
 
-    N2 --> N17
+    N1 -- True --> N2["Node 2:<br/>throw Subtotal Exception"]:::terminal
+    N1 -- False --> N3{"Node 3 (d2):<br/>items ≤ 0"}:::decision
 
-    N3 -- True --> N4["Node 4: throw Items Exception"]:::terminal
-    N3 -- False --> N5{"Node 5 (d3): int pct = 0; subtotal >= 1000"}:::decision
+    N3 -- True --> N4["Node 4:<br/>throw Items Exception"]:::terminal
+    N3 -- False --> N5{"Node 5 (d3):<br/>subtotal ≥ 1000<br/>(pct = 0)"}:::decision
 
-    N4 --> N17
+    N5 -- True --> N6["Node 6:<br/>pct = 15"]:::process
+    N5 -- False --> N7{"Node 7 (d4):<br/>subtotal ≥ 500"}:::decision
 
-    N5 -- True --> N6["Node 6: pct = 15"]:::process
-    N5 -- False --> N7{"Node 7 (d4): subtotal >= 500"}:::decision
+    N7 -- True --> N8["Node 8:<br/>pct = 10"]:::process
+    N7 -- False --> N9{"Node 9 (d5):<br/>subtotal ≥ 100"}:::decision
 
-    N7 -- True --> N8["Node 8: pct = 10"]:::process
-    N7 -- False --> N9{"Node 9 (d5): subtotal >= 100"}:::decision
+    N9 -- True --> N10["Node 10:<br/>pct = 5"]:::process
+    N9 -- False --> N11{"Node 11 (d6):<br/>items ≥ 10"}:::decision
 
-    N9 -- True --> N10["Node 10: pct = 5"]:::process
-    N9 -- False --> N11
-
-    N6 --> N11{"Node 11 (d6): items >= 10"}:::decision
+    N6 --> N11
     N8 --> N11
     N10 --> N11
 
-    N11 -- True --> N12["Node 12: pct += 2"]:::process
-    N11 -- False --> N13{"Node 13 (d7): member"}:::decision
-
+    N11 -- True --> N12["Node 12:<br/>pct += 2"]:::process
+    N11 -- False --> N13{"Node 13 (d7):<br/>member == true"}:::decision
     N12 --> N13
 
-    N13 -- True --> N14["Node 14: pct += 3"]:::process
-    N13 -- False --> N15{"Node 15 (d8): pct > 18"}:::decision
-
+    N13 -- True --> N14["Node 14:<br/>pct += 3"]:::process
+    N13 -- False --> N15{"Node 15 (d8):<br/>pct > 18"}:::decision
     N14 --> N15
 
-    N15 -- True --> N16["Node 16: pct = 18 (Cap)"]:::process
-    N15 -- False --> N17["Node 17 (EXIT): return discounted total"]:::terminal
+    N15 -- True --> N16["Node 16:<br/>pct = 18 (Cap)"]:::process
+    N15 -- False --> N17["Node 17 (EXIT):<br/>return discounted total"]:::terminal
 
     N16 --> N17
+    N2 --> N17
+    N4 --> N17
+```
+
+### Visual Text Flowchart (ASCII Reference):
+```
+           +-----------------------------------------------+
+           |    ENTRY: calculate(subtotal, items, member)  |
+           +-----------------------------------------------+
+                                   |
+                                   v
+                             /-----------\
+                            /   Node 1    \   True
+                           < subtotal <= 0 > ----------------> [ Node 2: throw Subtotal Ex ] ---+
+                            \    (d1)     /                                                      |
+                             \-----------/                                                       |
+                                   | False                                                       |
+                                   v                                                             |
+                             /-----------\                                                       |
+                            /   Node 3    \   True                                               |
+                           <  items <= 0   > ----------------> [ Node 4: throw Items Ex ] -------+
+                            \    (d2)     /                                                      |
+                             \-----------/                                                       |
+                                   | False                                                       |
+                                   v                                                             |
+                             /-----------\                                                       |
+                            /   Node 5    \   True                                               |
+                           < subtotal>=1000> ----------------> [ Node 6: pct = 15 ] -------------+
+                            \    (d3)     /                                                      |
+                             \-----------/                                                       |
+                                   | False                                                       |
+                                   v                                                             |
+                             /-----------\                                                       |
+                            /   Node 7    \   True                                               |
+                           < subtotal>=500 > ----------------> [ Node 8: pct = 10 ] -------------+
+                            \    (d4)     /                                                      |
+                             \-----------/                                                       |
+                                   | False                                                       |
+                                   v                                                             |
+                             /-----------\                                                       |
+                            /   Node 9    \   True                                               |
+                           < subtotal>=100 > ----------------> [ Node 10: pct = 5 ] -------------+
+                            \    (d5)     /                                                      |
+                             \-----------/                                                       |
+                                   | False                                                       |
+                                   | (pct = 0)                                                   |
+                                   v                                                             |
+                             /-----------\                                                       |
+                            /   Node 11   \ <----------------------------------------------------+
+                           <  items >= 10  >
+                            \    (d6)     / \ True
+                             \-----------/   +---------------> [ Node 12: pct += 2 ]
+                                   | False                            |
+                                   |                                  |
+                                   v                                  v
+                             /-----------\                     /-------------\
+                            /   Node 13   \ <-----------------+               |
+                           <  member==true >                                  |
+                            \    (d7)     / \ True                            |
+                             \-----------/   +---------------> [ Node 14: pct += 3 ]
+                                   | False                            |
+                                   |                                  |
+                                   v                                  v
+                             /-----------\                     /-------------\
+                            /   Node 15   \ <-----------------+               |
+                           <   pct > 18    >
+                            \    (d8)     / \ True
+                             \-----------/   +---------------> [ Node 16: pct = 18 ]
+                                   | False                            |
+                                   |                                  |
+                                   v                                  v
+           +------------------------------------------------------------------+
+           |                                                                  |
+           +------------------------------------------------------------------+
+                                   |
+                                   v
+           +-----------------------------------------------+
+           |    Node 17 (EXIT): return discounted total    |
+           +-----------------------------------------------+
 ```
 
 ---

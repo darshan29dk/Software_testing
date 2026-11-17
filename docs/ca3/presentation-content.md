@@ -95,23 +95,32 @@
 - **Flow Graph Architecture:**
 
 ```mermaid
-graph TD
-    N1{"1: subtotal <= 0"} -- T --> N2["2: throw Subtotal Ex"] --> N17["17: EXIT"]
-    N1 -- F --> N3{"3: items <= 0"}
-    N3 -- T --> N4["4: throw Items Ex"] --> N17
-    N3 -- F --> N5{"5: subtotal >= 1000"}
-    N5 -- T --> N6["6: pct = 15"] --> N11{"11: items >= 10"}
-    N5 -- F --> N7{"7: subtotal >= 500"}
-    N7 -- T --> N8["8: pct = 10"] --> N11
-    N7 -- F --> N9{"9: subtotal >= 100"}
-    N9 -- T --> N10["10: pct = 5"] --> N11
-    N9 -- F --> N11
-    N11 -- T --> N12["12: pct += 2"] --> N13{"13: member"}
+flowchart TD
+    classDef decision fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e3a8a;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#14532d;
+    classDef terminal fill:#fef2f2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d;
+
+    N1{"1: subtotal ≤ 0"}:::decision -- T --> N2["2: throw Subtotal Ex"]:::terminal
+    N1 -- F --> N3{"3: items ≤ 0"}:::decision
+    N3 -- T --> N4["4: throw Items Ex"]:::terminal
+    N3 -- F --> N5{"5: subtotal ≥ 1000"}:::decision
+    N5 -- T --> N6["6: pct = 15"]:::process
+    N5 -- F --> N7{"7: subtotal ≥ 500"}:::decision
+    N7 -- T --> N8["8: pct = 10"]:::process
+    N7 -- F --> N9{"9: subtotal ≥ 100"}:::decision
+    N9 -- T --> N10["10: pct = 5"]:::process
+    N9 -- F --> N11{"11: items ≥ 10"}:::decision
+    N6 --> N11
+    N8 --> N11
+    N10 --> N11
+    N11 -- T --> N12["12: pct += 2"]:::process --> N13{"13: member"}:::decision
     N11 -- F --> N13
-    N13 -- T --> N14["14: pct += 3"] --> N15{"15: pct > 18"}
+    N13 -- T --> N14["14: pct += 3"]:::process --> N15{"15: pct > 18"}:::decision
     N13 -- F --> N15
-    N15 -- T --> N16["16: pct = 18"] --> N17
+    N15 -- T --> N16["16: pct = 18"]:::process --> N17["17: EXIT"]:::terminal
     N15 -- F --> N17
+    N2 --> N17
+    N4 --> N17
 ```
 
 ---
